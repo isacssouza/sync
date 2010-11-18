@@ -1,6 +1,27 @@
 #!/bin/bash
 
-# set -x
+# -d Run on debug mode
+# -v Print verbose information
+
+# check if the -d argument was given.
+if [ `echo $* | grep -c "\-d"` -ne 0 ] 
+then
+    # set debug mode
+    set -x
+fi
+
+# save the current stdout file descriptor
+exec 3>&1
+
+# by default, print everything to /dev/null
+exec 1>/dev/null
+
+# check if the -v argument was given.
+if [ `echo $* | grep -c "\-v"` -ne 0 ] 
+then
+    # set verbose mode. i.e. print on stdout
+    exec 1>&3
+fi
 
 # the name of the file used for keeping the time of the last sync
 syncFile=/tmp/.lastSync
@@ -28,7 +49,7 @@ do
     if [ $changedNum -ne 0 ] # if at least one file was changed
     then
         # Do the sync
-        rsync -Phravz $src $dest
+        rsync -Phravz $src $dest 
 
         # touch the sync file to keep the last sync time
         touch $syncFile
