@@ -32,8 +32,19 @@ src=$1
 # the destiny is the second parameter
 dest=$2
 
+
+# check if the destiny is a remote connection.
+if [ `echo $dest | grep -c "@"` -ne 0 ] 
+then
+    # get only the user@host from the destiny
+    host=`echo $dest | sed -e 's/:.*//'`
+
+    # keep a master connection for faster slave connections
+    ssh -TMNf -S ~/.ssh/syncMaster $host
+fi
+
 # Do an initial sync.
-rsync -Phravz $src $dest
+rsync -e 'ssh -S ~/.ssh/syncMaster' -Phravz $src $dest
 
 # create the sync file
 touch $syncFile
@@ -43,13 +54,13 @@ do
     # Look for changed files after last $syncFiles change. 
     # This will give us the number of files changed after the last sync.
     changedNum=`find $src -cnewer $syncFile -type f | wc -l`
-    
-    echo "Number of files changed: $changedNum"
-    
+   
     if [ $changedNum -ne 0 ] # if at least one file was changed
     then
+        echo "Number of files changed: $changedNum"
+    
         # Do the sync
-        rsync -Phravz $src $dest 
+        rsync -e 'ssh -S ~/.ssh/syncMaster' -Phravz $src $dest 
 
         # touch the sync file to keep the last sync time
         touch $syncFile
