@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # -d Run on debug mode
-# -v Print verbose information
+# -q Quiet mode
 
 # check if the -d argument was given.
 if [ `echo $* | grep -c "\-d"` -ne 0 ] 
@@ -13,14 +13,11 @@ fi
 # save the current stdout file descriptor
 exec 3>&1
 
-# by default, print everything to /dev/null
-exec 1>/dev/null
-
-# check if the -v argument was given.
-if [ `echo $* | grep -c "\-v"` -ne 0 ] 
+# check if the -q argument was given.
+if [ `echo $* | grep -c "\-q"` -ne 0 ] 
 then
-    # set verbose mode. i.e. print on stdout
-    exec 1>&3
+    # set quiet mode. i.e. print on /dev/null
+    exec 1>/dev/null
 fi
 
 # the name of the file used for keeping the time of the last sync
