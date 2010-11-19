@@ -1,5 +1,19 @@
 #!/bin/bash
 
+masterPid=-1
+
+killed()
+{
+	echo "Exiting..."
+    pkill -fn "ssh -TMNf -S $sshFile $host"
+    rm $syncFile
+    exit
+}
+
+# trap the kill signal
+trap killed EXIT
+
+
 # -d Run on debug mode
 # -q Quiet mode
 
@@ -14,21 +28,23 @@ fi
 exec 3>&1
 
 # check if the -q argument was given.
-if [ `echo $* | grep -c "\-q"` -ne 0 ] 
+if [ `echo $* | grep -c "\-q"` -ne 0 ]
 then
     # set quiet mode. i.e. print on /dev/null
     exec 1>/dev/null
 fi
 
 # the name of the file used for keeping the time of the last sync
-syncFile=/tmp/.lastSync
+syncFile=/tmp/.lastSync$$
+
+# the name of the file used to keep the ssh connection
+sshFile=/tmp/syncMaster$$
 
 # the source is the first paramenter
 src=$1
 
 # the destiny is the second parameter
 dest=$2
-
 
 # check if the destiny is a remote connection.
 if [ `echo $dest | grep -c "@"` -ne 0 ] 
@@ -37,11 +53,11 @@ then
     host=`echo $dest | sed -e 's/:.*//'`
 
     # keep a master connection for faster slave connections
-    ssh -TMNf -S ~/.ssh/syncMaster $host
+    ssh -TMNf -S $sshFile $host
 fi
 
 # Do an initial sync.
-rsync -e 'ssh -S ~/.ssh/syncMaster' -Phravz $src $dest
+rsync -e "ssh -S $sshFile" -Phravz $src $dest
 
 # create the sync file
 touch $syncFile
@@ -57,7 +73,7 @@ do
         echo "Number of files changed: $changedNum"
     
         # Do the sync
-        rsync -e 'ssh -S ~/.ssh/syncMaster' -Phravz $src $dest 
+        rsync -e "ssh -S $sshFile" -Phravz $src $dest 
 
         # touch the sync file to keep the last sync time
         touch $syncFile
@@ -66,3 +82,4 @@ do
     # Sleep some time so we don't eat all resources
     sleep 1
 done
+
