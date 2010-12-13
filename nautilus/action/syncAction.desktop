@@ -1,0 +1,25 @@
+
+[Desktop Entry]
+Type=Action
+Name[en_US.utf8]=sync
+Name[en_US]=sync
+Name[en.utf8]=sync
+Name[en]=sync
+Name[C]=sync
+TargetLocation=true
+ToolbarLabel[en_US.utf8]=sync
+ToolbarLabel[en_US]=sync
+ToolbarLabel[en.utf8]=sync
+ToolbarLabel[en]=sync
+ToolbarLabel[C]=sync
+Profiles=profile-zero;
+
+[X-Action-Profile profile-zero]
+Name[en_US.utf8]=Default profile
+Name[en_US]=Default profile
+Name[en.utf8]=Default profile
+Name[en]=Default profile
+Name[C]=Default profile
+Exec=/home/isouza/sync/nautilus/nautilusSync.sh %F/
+Schemes=ftp;sftp;file;
+MimeTypes=inode/directory;
